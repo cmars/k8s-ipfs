@@ -1,0 +1,38 @@
+namespace: ipfs
+resources:
+- ipfs-cluster-service.yaml
+- ipfs-cluster-statefulset.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+- name: cluster-config
+  files:
+  - site/bootstrap-peer-id
+  - site/bootstrap-peer-pub-key
+  envs:
+  - cluster-config.env
+- name: ipfs-cluster-set-bootstrap-conf
+  files:
+  - custom/entrypoint.sh
+  - custom/configure-ipfs.sh
+secretGenerator:
+- name: cluster-secrets
+  files:
+  - secrets/cluster-secret
+  - secrets/bootstrap-peer-priv-key
+vars:
+- name: CLUSTER_SVC_NAME
+  objref:
+    kind: Service
+    name: ipfs-cluster
+    apiVersion: v1
+  fieldref:
+    fieldpath: metadata.name
+# TODO: replace this with something better
+- name: CLUSTER_EXTERNAL_HOSTNAME
+  objref:
+    kind: ConfigMap
+    name: cluster-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.external-hostname
