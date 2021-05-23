@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ipfs
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/auth-type: basic
+    traefik.ingress.kubernetes.io/auth-secret: basic-auth
+#    traefik.ingress.kubernetes.io/auth-realm: IPFS
+spec:
+  rules:
+  - host: $(IPFS_PUBLIC_HOST)
+    http:
+      paths:
+      - backend:
+          service:
+            name: ipfs
+            port:
+              number: 5001
+        path: /
+        pathType: Prefix

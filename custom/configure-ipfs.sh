@@ -4,10 +4,6 @@ set -x
 # This is a custom entrypoint for k8s designed to run ipfs nodes in an appropriate
 # setup for production scenarios.
 
-user=root
-mkdir -p /data/ipfs && chown -R ipfs /data/ipfs
-
-user=ipfs
 if [ -e /data/ipfs/config ]; then
   if [ -f /data/ipfs/repo.lock ]; then
     rm /data/ipfs/repo.lock
@@ -19,4 +15,5 @@ ipfs config Addresses.API /ip4/0.0.0.0/tcp/5001
 ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/8080
 ipfs config --json Swarm.ConnMgr.HighWater 2000
 ipfs config --json Datastore.BloomFilterSize 1048576
-ipfs config Datastore.StorageMax 50GB
+ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http://'$IPFS_PUBLIC_HOST'", "http://localhost:3000", "http://127.0.0.1:5001", "https://webui.ipfs.io"]'
+ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST"]'

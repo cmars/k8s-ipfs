@@ -1,38 +1,28 @@
 namespace: ipfs
 resources:
-- ipfs-cluster-service.yaml
-- ipfs-cluster-statefulset.yaml
+#- ipfs-auth-middleware.yaml
+- ipfs-ingress.yaml
+- ipfs-service.yaml
+- ipfs-statefulset.yaml
 generatorOptions:
   disableNameSuffixHash: true
 configMapGenerator:
-- name: cluster-config
+- name: ipfs-set-bootstrap-conf
   files:
-  - site/bootstrap-peer-id
-  - site/bootstrap-peer-pub-key
-  envs:
-  - cluster-config.env
-- name: ipfs-cluster-set-bootstrap-conf
-  files:
-  - custom/entrypoint.sh
   - custom/configure-ipfs.sh
+- name: ipfs-site
+  literals:
+  # TODO: improve this
+  - public-hostname=opcube.local
 secretGenerator:
-- name: cluster-secrets
+- name: basic-auth
   files:
-  - secrets/cluster-secret
-  - secrets/bootstrap-peer-priv-key
+  - usersFile=secrets/basic-auth
 vars:
-- name: CLUSTER_SVC_NAME
-  objref:
-    kind: Service
-    name: ipfs-cluster
-    apiVersion: v1
-  fieldref:
-    fieldpath: metadata.name
-# TODO: replace this with something better
-- name: CLUSTER_EXTERNAL_HOSTNAME
+- name: IPFS_PUBLIC_HOST
   objref:
     kind: ConfigMap
-    name: cluster-config
+    name: ipfs-site
     apiVersion: v1
   fieldref:
-    fieldpath: data.external-hostname
+    fieldpath: data.public-hostname
